@@ -702,9 +702,12 @@ export async function convertCssToTailwind(css: string): Promise<string> {
               console.log("Matched rule for property:", kebabProp);
               if (
                 !rule.valuePattern ||
-                (rule.valuePattern && rule.valuePattern.test(value))
+                (rule.valuePattern && rule.valuePattern.test(value as string))
               ) {
-                const tailwindClass = rule.converter(value, kebabProp);
+                const tailwindClass = rule.converter(
+                  value as string,
+                  kebabProp
+                );
                 if (tailwindClass) {
                   classes.push(tailwindClass);
                   converted = true;
