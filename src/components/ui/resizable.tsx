@@ -18,7 +18,16 @@ const ResizablePanelGroup = ({
   />
 );
 
-const ResizablePanel = ResizablePrimitive.Panel;
+// Corriger cette partie en définissant une fonction qui enveloppe le composant Panel
+const ResizablePanel = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof ResizablePrimitive.Panel>) => (
+  <ResizablePrimitive.Panel
+    className={cn(className)}
+    {...props}
+  />
+);
 
 const ResizableHandle = ({
   withHandle,
