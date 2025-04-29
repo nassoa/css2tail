@@ -38,9 +38,10 @@ CSS2Tail est un outil interactif qui convertit du CSS brut en classes Tailwind C
 **CSS d'entrée :**
 
 ```CSS
-.box {
-  width: 137px;
-  height: 50%;
+.title {
+  margin: 1rem;
+  padding: 0.5rem;
+  font-size: 1.25rem;
 }
 ```
 
