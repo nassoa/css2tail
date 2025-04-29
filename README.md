@@ -52,4 +52,6 @@ className="m-4 p-2 text-xl"
 
 ## Auteur
 
-- **[nassoa]** - Développeur principal et créateur de CSS2Tail.
+## Auteur
+
+- **nassoa** - [GitHub](https://github.com/nassoa/)
