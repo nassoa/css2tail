@@ -670,76 +670,84 @@ function convertHexToTailwindColor(hex: string): string {
 
 export async function convertCssToTailwind(css: string): Promise<string> {
   try {
-    const root = postcss.parse(css);
-    const cssObject = postcssJs.objectify(root);
+    // Nouveau parser CSS maison
+    const parsedCSS = parseCSS(css);
 
     const tailwindClassesMap = new Map<string, string[]>();
 
-    for (const [selector, properties] of Object.entries(cssObject)) {
-      if (typeof properties !== "object") continue;
-
+    for (const [selector, properties] of Object.entries(parsedCSS)) {
       const classes: string[] = [];
 
-      if (properties && typeof properties === "object") {
-        for (const [prop, value] of Object.entries(properties)) {
-          console.log("Processing property:", prop, "Value:", value);
+      for (const [prop, value] of Object.entries(properties)) {
+        const kebabProp = prop.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+        let converted = false;
 
-          // Convert camelCase to kebab-case
-          const kebabProp = prop.replace(
-            /[A-Z]/g,
-            (m) => `-${m.toLowerCase()}`
-          );
-          console.log("Normalized property:", kebabProp);
+        for (const rule of conversionRules) {
+          const propMatch =
+            typeof rule.property === "string"
+              ? kebabProp === rule.property
+              : rule.property.test(kebabProp);
 
-          let converted = false;
+          if (propMatch) {
+            const valuePattern = rule.valuePattern;
+            const valueStr = String(value).trim();
 
-          for (const rule of conversionRules) {
-            if (
-              (typeof rule.property === "string" &&
-                kebabProp === rule.property) ||
-              (rule.property instanceof RegExp && rule.property.test(kebabProp))
-            ) {
-              console.log("Matched rule for property:", kebabProp);
-              if (
-                !rule.valuePattern ||
-                (rule.valuePattern && rule.valuePattern.test(value as string))
-              ) {
-                const tailwindClass = rule.converter(
-                  value as string,
-                  kebabProp
-                );
-                if (tailwindClass) {
-                  classes.push(tailwindClass);
-                  converted = true;
-                  break;
-                }
+            if (!valuePattern || valuePattern.test(valueStr)) {
+              const tailwindClass = rule.converter(valueStr, kebabProp);
+              if (tailwindClass) {
+                classes.push(tailwindClass);
+                converted = true;
+                break;
               }
             }
           }
+        }
 
-          if (!converted) {
-            console.log("No rule matched for property:", kebabProp);
-            classes.push(`${kebabProp}-[${value}]`);
-          }
+        if (!converted) {
+          classes.push(`${kebabProp}-[${value}]`);
         }
       }
 
-      tailwindClassesMap.set(selector, classes);
-    }
-
-    let result = "";
-    for (const [selector, classes] of Array.from(
-      tailwindClassesMap.entries()
-    )) {
       if (classes.length > 0) {
-        result += `/* ${selector} */\n`;
-        result += `className="${classes.join(" ")}"\n\n`;
+        tailwindClassesMap.set(selector, classes);
       }
     }
 
-    return result.trim();
+    return formatResult(tailwindClassesMap);
   } catch (error) {
-    console.error("Error in convertCssToTailwind:", error);
+    console.error("Conversion error:", error);
     return "/* Error: Failed to convert CSS */";
   }
+}
+
+// Helpers
+function parseCSS(css: string): Record<string, Record<string, string>> {
+  return css
+    .split("}")
+    .filter((rule) => rule.trim())
+    .reduce((acc, rule) => {
+      const [selectorPart, declarations] = rule.split("{");
+      const selector = selectorPart?.trim();
+
+      if (selector && declarations) {
+        acc[selector] = declarations
+          .split(";")
+          .filter((decl) => decl.trim())
+          .reduce((props, decl) => {
+            const [prop, value] = decl.split(":").map((s) => s.trim());
+            if (prop && value) props[prop] = value.replace(/!important/g, "");
+            return props;
+          }, {} as Record<string, string>);
+      }
+      return acc;
+    }, {} as Record<string, Record<string, string>>);
+}
+
+function formatResult(map: Map<string, string[]>): string {
+  return Array.from(map.entries())
+    .map(
+      ([selector, classes]) =>
+        `/* ${selector} */\nclassName="${classes.join(" ")}"`
+    )
+    .join("\n\n");
 }

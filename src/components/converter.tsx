@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CssEditor } from "@/components/css-editor";
 import { TailwindOutput } from "@/components/tailwind-output";
 import { CopyButton } from "@/components/copy-button";
@@ -9,7 +9,6 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { useDebounce } from "@/hooks/use-debounce";
 import { Progress } from "@/components/ui/progress";
 import { convertCssToTailwind } from "@/lib/converter";
 
@@ -18,21 +17,24 @@ export function Converter() {
   const [tailwind, setTailwind] = useState("");
   const [isConverting, setIsConverting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const debouncedCss = useDebounce(css, 400);
+  useEffect(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-  React.useEffect(() => {
-    const convert = async () => {
-      if (!debouncedCss.trim()) {
-        setTailwind("");
-        return;
-      }
+    if (!css.trim()) {
+      setTailwind("");
+      return;
+    }
 
+    timeoutRef.current = setTimeout(async () => {
       setIsConverting(true);
       setProgress(30);
 
       try {
-        const result = await convertCssToTailwind(debouncedCss);
+        const result = await convertCssToTailwind(css);
         setProgress(70);
         setTailwind(result || "");
         setProgress(100);
@@ -45,14 +47,14 @@ export function Converter() {
           setProgress(0);
         }, 300);
       }
-    };
+    }, 400);
 
-    if (debouncedCss.trim()) {
-      convert();
-    } else {
-      setTailwind("");
-    }
-  }, [debouncedCss]);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [css]);
 
   return (
     <div className="h-screen w-full flex flex-col">

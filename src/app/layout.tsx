@@ -2,8 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Zap } from "lucide-react";
+import { NavBar } from "@/components/nav-bar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,16 +25,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relatative container mx-auto">
-            <div className="flex justify-between items-center py-4">
-              <div className="flex items-center gap-x-2">
-                <Zap className="w-6 h-6 text-emerald-500" />
-                <h1 className="text-2xl font-bold">CSS2Tail</h1>
-              </div>
-              <ThemeToggle />
-            </div>
-            {children}
-          </div>
+          <NavBar />
+
+          {children}
         </ThemeProvider>
       </body>
     </html>
