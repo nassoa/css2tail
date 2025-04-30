@@ -1,6 +1,3 @@
-import postcss from "postcss";
-import postcssJs from "postcss-js";
-
 type ConversionRule = {
   property: string | RegExp;
   valuePattern?: RegExp;

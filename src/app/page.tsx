@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Converter } from "@/components/converter";
 
 export default function Home() {
