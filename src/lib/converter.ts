@@ -375,6 +375,77 @@ const conversionRules: ConversionRule[] = [
     },
   },
 
+  // alignements
+  {
+    property: "align-items",
+    converter: (value) => {
+      const alignMap: Record<string, string> = {
+        center: "items-center",
+        start: "items-start",
+        end: "items-end",
+        baseline: "items-baseline",
+        stretch: "items-stretch",
+      };
+
+      return alignMap[value] || `items-[${value}]`;
+    },
+  },
+  {
+    property: "justify-content",
+    converter: (value) => {
+      const justifyMap: Record<string, string> = {
+        center: "justify-center",
+        start: "justify-start",
+        end: "justify-end",
+        between: "justify-between",
+        around: "justify-around",
+        evenly: "justify-evenly",
+        left: "justify-start",
+        right: "justify-end",
+        baseline: "items-baseline",
+        stretch: "items-stretch",
+        inherit: "inherit",
+        initial: "initial",
+        "space-between": "justify-between",
+        "space-around": "justify-around",
+        "space-evenly": "justify-evenly",
+        "space-x-reverse": "space-x-reverse",
+        "space-y-reverse": "space-y-reverse",
+      };
+
+      return justifyMap[value] || `justify-[${value}]`;
+    },
+  },
+
+  // Flex Direction
+  {
+    property: "flex-direction",
+    converter: (value) => {
+      const directionMap: Record<string, string> = {
+        row: "flex-row",
+        column: "flex-col",
+        "row-reverse": "flex-row-reverse",
+        "column-reverse": "flex-col-reverse",
+      };
+
+      return directionMap[value] || `flex-[${value}]`;
+    },
+  },
+
+  // Flex Wrap
+  {
+    property: "flex-wrap",
+    converter: (value) => {
+      const wrapMap: Record<string, string> = {
+        nowrap: "flex-nowrap",
+        wrap: "flex-wrap",
+        "wrap-reverse": "flex-wrap-reverse",
+      };
+
+      return wrapMap[value] || `flex-[${value}]`;
+    },
+  },
+
   // Padding
   {
     property: /^padding$/,
